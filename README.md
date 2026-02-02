@@ -112,10 +112,12 @@ In ComfyUI, both UNet and VAE typically stay loaded in VRAM throughout the gener
 
 ### When to Use This Pattern
 
-1. High-resolution rendering on limited VRAM
-2. Batch processing – generate many latents, decode later
-3. Experimenting – keep latents and try different VAEs/upscalers
-4. Resource management – unload heavy models when not needed
+1.    High-resolution rendering on limited VRAM (12GB or less)
+2.    Batch processing: generate latents in bulk, decode later
+3.    Model experimentation: try different VAEs on identical latents
+4.    Latent archiving: save your best generations for future use
+5.    Resource optimization: unload heavy models when not needed
+6.    Team collaboration: share latents (small files) instead of full workflows
 
 ### Complete Workflow Files
 
