@@ -94,9 +94,8 @@ In ComfyUI, both UNet and VAE typically stay loaded in VRAM throughout the entir
 **What happens:**
 1. Restart ComfyUI
 2. **Load saved latents** using `LoadCustomLatent` node
-3. Browse and select your `.latent` file
-4. Connect to VAE decoder
-5. Generate final image
+3. Connect to VAE decoder
+4. Generate final image
 
 **VRAM Usage:** Low (only VAE loaded)  
 **Output:** Final high-resolution image
