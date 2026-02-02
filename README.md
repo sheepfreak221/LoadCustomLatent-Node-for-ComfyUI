@@ -57,95 +57,71 @@ git clone https://github.com/sheepfreak221/LoadCustomLatent-Node-for-ComfyUI.git
 
 ---
 
-
-
-
-
-
-
-
-
-
 ## Example Workflow: VRAM-Efficient Rendering
 
-### The Problem with Standard Workflows
-In ComfyUI, both UNet and VAE typically stay loaded in VRAM throughout the entire generation process. This limits maximum resolution on GPUs with 12GB or less VRAM.
+### The Problem
 
-### The Solution: Two-Pass Workflow with LoadCustomLatent
+In ComfyUI, both UNet and VAE typically stay loaded in VRAM throughout the generation process, which limits the maximum resolution on GPUs with 12 GB or less VRAM.
+
+### Two-Pass Workflow with LoadCustomLatent
 
 #### **Pass 1: Sampling & Save** (High VRAM Usage)
+
 ![Pass 1: Sampling Workflow](docs/assets/screenshots/workflow_part1.png)
 
 **What happens:**
+
 1. Load checkpoint (e.g., `flux1-schnell-fp8.safetensors`)
 2. Configure sampler with your prompt
 3. Generate latents
-4. **Save latents to disk** using `SaveLatent` node
+4. **Save latents to disk** using the `SaveLatent` node
 5. **UNet is loaded in VRAM** during this phase
 
-**VRAM Usage:** High  
+**VRAM Usage:** High
 **Output:** `.latent` file saved to `ComfyUI/output/`
 
 ---
 
 #### **Pass 2: Loading & Decoding** (Low VRAM Usage)
+
 ![Pass 2: Decoding Workflow](docs/assets/screenshots/workflow_part2.png)
 
 **What happens:**
+
 1. Restart ComfyUI
-2. **Load saved latents** using `LoadCustomLatent` node
+2. **Load saved latents** using the `LoadCustomLatent` node
 3. Connect to VAE decoder
 4. Generate final image
 
-**VRAM Usage:** Low (only VAE loaded)  
+**VRAM Usage:** Low (only VAE loaded)
 **Output:** Final high-resolution image
+
+
+
+> **Preview Option:** For quick testing, you can render a fast preview (~512×512) without splitting the workflow. Then use the two-pass workflow for high-resolution images (1024×1024 or higher) **using the same seed** to reproduce the preview exactly and avoid OOM on 12 GB GPUs.
 
 ---
 
 ### Workflow Comparison
-| | Standard Workflow | Split Workflow with LoadCustomLatent |
-|-|-------------------|--------------------------------------|
-| **VRAM Usage** | UNet + VAE (high) | Only UNet or VAE  |
-| **Max Resolution on 12GB** | ~512×512 | **1024×1024+** |
-| **Workflow** | Single pass | Two passes |
+
+|                            | Standard Workflow | Split Workflow with LoadCustomLatent |
+| -------------------------- | ----------------- | ------------------------------------ |
+| **VRAM Usage**             | UNet + VAE (high) | Only UNet or VAE                     |
+| **Max Resolution on 12GB** | ~512×512          | **1024×1024+**                       |
+| **Workflow**               | Single pass       | Two passes                           |
 
 ### When to Use This Pattern
-1. **High-resolution rendering** on limited VRAM
-2. **Batch processing** - generate many latents, decode later
-3. **Experimenting** - keep latents, try different VAEs/upscalers
-4. **Resource management** - unload heavy models when not needed
+
+1. High-resolution rendering on limited VRAM
+2. Batch processing – generate many latents, decode later
+3. Experimenting – keep latents and try different VAEs/upscalers
+4. Resource management – unload heavy models when not needed
 
 ### Complete Workflow Files
-Download the example workflows:
-- [Pass 1: Sampling](examples/workflows/flux_schnell_PART1_Sampler2Latent.json)
-- [Pass 2: Decoding](examples/workflows/flux_schnell_PART2_Latent2Img.json)
 
+* [Pass 1: Sampling](examples/workflows/flux_schnell_PART1_Sampler2Latent.json)
+* [Pass 2: Decoding](examples/workflows/flux_schnell_PART2_Latent2Img.json)
 
-
-
-
-
-
-
-
-
-
-
-
-## Example Workflow
-
-### Preview (approx. 512×512)
-
-* Preview render (approx. 512×512) → works smoothly on a 12 GB RDNA2 GPU **without a split workflow**.
-
-### High-Resolution Render (1024×1024 or 944×1152)
-
-1. **Sampling** → UNet generates a latent → save to disk.
-2. **LoadCustomLatent** → Load the latent → decode with VAE **without UNet in VRAM**.
-
-**Advantage:** High-resolution images become possible, even on 12 GB RDNA2 GPUs, **without OOM (Out of Memory)**.
-
-> The workflow allows: first render a fast preview → re-render only selected seeds at high resolution → perfect for Flux1-Schnell-FP8 on 12 GB RDNA2 GPUs.
 
 ---
 
